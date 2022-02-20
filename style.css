@@ -1,0 +1,41 @@
+* {
+    margin: 0;
+    box-sizing: border-box;
+}
+
+body {
+    display: grid;
+    place-items: center;
+    height: 100vh;
+}
+
+#board {
+    display: grid;
+    grid-template: repeat(3, 1fr) / repeat(3, 1fr);
+    border: 20px solid black;
+    border-radius: 16px;
+    width: 500px;
+    height: 500px;
+}
+
+.card {
+    display: grid;
+    place-items: center;
+    /* width: 100%;
+    height: 100%; */
+    border: 2px solid black;
+}
+
+.grid-top-edge {
+    border-top: none;
+}
+.grid-bottom-edge {
+    border-bottom: none;
+}
+.grid-left-edge {
+    border-left: none;
+}
+.grid-right-edge {
+    border-right: none;
+}
+
