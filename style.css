@@ -1,9 +1,10 @@
 * {
     margin: 0;
     box-sizing: border-box;
+    font-family: 'Roboto', sans-serif;
 }
 
-body {
+#wrapper {
     display: grid;
     place-items: center;
     height: 100vh;
@@ -37,5 +38,51 @@ body {
 }
 .grid-right-edge {
     border-right: none;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.player-select {
+    display: flex;
+    gap: 2.5rem;
+    margin-top: 0.5rem;
+}
+
+.player-select button {
+    border: none;
+    background-color: red;
+    color: white;
+    border-radius: 16px;
+    padding: 2rem 2.5rem;
+    font-size: 3em;
+}
+
+.player-select button:hover {
+    background-color: hsl(0, 100%, 45%);
+}
+
+#menu {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 2rem;
+    height: 100vh;
+    text-align: center;
+}
+
+#menu p {
+    font-size: 1.25em;
+    text-align: center;
+    line-height: 1.25;
+}
+
+#menu h1 {
+    font-size: 2.5em;
+    font-weight: 900;
+    text-decoration: underline;
+    text-underline-offset: 5px;
 }
 
