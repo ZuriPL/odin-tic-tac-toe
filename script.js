@@ -1,11 +1,9 @@
 const boardDOM = document.getElementById('board')
 
 const playerFactory = (name, mark) => {
-    let points = 0;
     return {
         name,
         mark,
-        points
     }
 }
 
