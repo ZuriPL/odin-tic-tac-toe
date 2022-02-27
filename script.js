@@ -44,7 +44,6 @@ const game = (() => {
         let result = false;
         const arr = boardArray;
 
-        
         // yes, there's a lot of magic numbers in here and I hate it
         for (let i = 0; i < 3; i++) {
             if (arr[i] == mark && arr[i + 3] == mark && arr[i + 6] == mark) {
@@ -182,29 +181,6 @@ const displayController = (() => {
         endGame
     };
 })();
-
-
-
-
-// function doesMarkWin(mark) {
-//     let result = false
-//     arr = game.boardArray
-//     for (let i = 0; i < 3; i++) {
-//         if (arr[i] == mark && arr[i + 3] == mark && arr[i + 6] == mark) {
-//             result = true
-//         } else if (arr[i * 3] == mark && arr[i * 3 + 1] == mark && arr[i * 3 + 2] == mark) {
-//             result = true
-//         }
-//     }
-//     if (!result && arr[4] == mark) {
-//         if (arr[0] == mark && arr[8] == mark) {
-//             result = true
-//         } else if (arr[2] == mark && arr[6] == mark) {
-//             result = true
-//         }
-//     }
-//     return result
-// }
 
 const gameMenu = (() => {
 
