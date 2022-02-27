@@ -44,8 +44,7 @@ const game = (() => {
         let result = false;
         const arr = boardArray;
 
-        if (mark == 'tie' && !arr.includes('')) return true
-
+        
         // yes, there's a lot of magic numbers in here and I hate it
         for (let i = 0; i < 3; i++) {
             if (arr[i] == mark && arr[i + 3] == mark && arr[i + 6] == mark) {
@@ -60,6 +59,7 @@ const game = (() => {
         } else if (arr[2] == mark && arr[6] == mark) {
             result = true
         };
+        if (mark == 'tie' && !arr.includes('')) return true
         return result;
     };
 
