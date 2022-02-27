@@ -5,8 +5,11 @@
 }
 
 #wrapper {
-    display: grid;
-    place-items: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5rem;
     height: 100vh;
 }
 
@@ -50,7 +53,8 @@
     margin-top: 0.5rem;
 }
 
-.player-select button {
+.menu-button,
+.end-game-button {
     border: none;
     background-color: red;
     color: white;
@@ -59,7 +63,27 @@
     font-size: 3em;
 }
 
-.player-select button:hover {
+.end-game-button {
+    font-size: 1.5em;
+    padding-inline: 2.5rem;
+    height: 4rem;
+    display: flex;
+    align-items: center
+}   
+
+#wrapper h1 {
+    position: relative;
+    top: 100%;
+    transform: translateY(-100%);
+}
+
+#wrapper .end-wrapper {
+    height: 4rem;
+    position: relative;
+}
+
+.menu-button:hover,
+.end-game-button:hover {
     background-color: hsl(0, 100%, 45%);
 }
 

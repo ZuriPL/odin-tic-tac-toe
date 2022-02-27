@@ -8,9 +8,13 @@ function initBoard() {
 };
 
 const playerFactory = (name, mark, isHuman) => {
-    let svgMark = `x`
+    let svgMark = `<svg style="width:48px;height:48px" viewBox="0 0 24 24">
+    <path fill="currentColor" d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" />
+</svg>`
     if (mark == 'o') {
-        svgMark = `o`
+        svgMark = `<svg style="width:36px;height:36px" viewBox="0 0 24 24">
+        <path fill="currentColor" d="M12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z" />
+    </svg>`
     }
     return {
         name,
@@ -40,6 +44,8 @@ const game = (() => {
         let result = false;
         const arr = boardArray;
 
+        if (mark == 'tie' && !arr.includes('')) return true
+
         // yes, there's a lot of magic numbers in here and I hate it
         for (let i = 0; i < 3; i++) {
             if (arr[i] == mark && arr[i + 3] == mark && arr[i + 6] == mark) {
@@ -48,31 +54,55 @@ const game = (() => {
                 result = true
             };
         };
-        if (!result && arr[4] == mark) {
-            if (arr[0] == mark && arr[8] == mark) {
-                result = true
-            } else if (arr[2] == mark && arr[6] == mark) {
-                result = true
-            };
+        if (result || arr[4] !== mark) return result
+        if (arr[0] == mark && arr[8] == mark) {
+            result = true
+        } else if (arr[2] == mark && arr[6] == mark) {
+            result = true
         };
         return result;
     };
 
     const cellEventHandler = (cell) => {
+        cell = cell.target
         const index = +cell.getAttribute('index');
         displayController.setMark(index, currentPlayerObj.svgMark);
         boardArray[index] = currentPlayerObj.mark;
-        if (doesMarkWin(currentPlayerObj.mark)) {
-            console.log(currentPlayerObj.name)
+
+        const results = ['x', 'o', 'tie']
+        let result = ''
+        for (let i in results) {
+            if (doesMarkWin(results[i])) result = results[i]
         }
+        if (result !== '') game.endGame(result)
         
         currentPlayerObj = (currentPlayerObj == playerOne) ? playerTwo : playerOne;
     }
+
+    const endGame = (w) => {
+        Array.from(document.querySelectorAll('#board > *')).forEach(cell => {
+            cell.removeEventListener('click', game.cellEventHandler);
+        })
+        let msg
+        switch (w) {
+            case 'x':
+                msg = `Player P1 wins!`;
+                break;
+            case 'o':
+                msg = `Player P2 wins!`;
+                break;
+            default:
+                msg = "It's a tie";
+        };
+        displayController.endGame(msg);
+    }
+;
     return {
         boardArray,
         cellEventHandler,
         getCurrentPlayerObj,
-        initVars
+        initVars,
+        endGame
     };
 })();
 
@@ -86,10 +116,6 @@ const displayController = (() => {
 
     
     const initGrid = () => {
-        // Array.from(boardDOM.children).forEach(e => {
-        //     e.remove()
-        // })
-
         initBoard();
 
         for (let i = 0; i < 9; i++) {
@@ -117,9 +143,7 @@ const displayController = (() => {
             
             boardDOM.appendChild(cell);
 
-            cell.addEventListener('click', e => {
-                game.cellEventHandler(cell);
-            });
+            cell.addEventListener('click', game.cellEventHandler);
         };
 
         
@@ -129,10 +153,33 @@ const displayController = (() => {
         document.querySelector(`div[index='${ind}']`).innerHTML = mark;
     };
 
+
+    const endGame = (w) => {
+        const endWrapper = document.createElement('div')
+        endWrapper.classList.add('end-wrapper')
+        document.querySelector('#wrapper').insertBefore(endWrapper, document.querySelector('#board'))
+
+        const endTitle = document.createElement('h1')
+        endTitle.textContent = w
+        endTitle.classList.add('win-title')
+        endWrapper.appendChild(endTitle)
+
+        const newGameBtn = document.createElement('button')
+        newGameBtn.textContent = 'Play again'
+        newGameBtn.classList.add('end-game-button')
+        document.querySelector('#wrapper').appendChild(newGameBtn)
+
+        newGameBtn.addEventListener('click', e => {
+            gameMenu.handleMenu()
+            endWrapper.remove()
+            newGameBtn.remove()
+        })
+    }
+
     return {
         clear,
-        initGrid,
-        setMark
+        setMark,
+        endGame
     };
 })();
 
@@ -190,7 +237,7 @@ const gameMenu = (() => {
         }
 
         game.initVars()
-        displayController.initGrid();
+        displayController.clear();
     }
 
     return {
