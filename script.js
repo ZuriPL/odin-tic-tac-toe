@@ -66,7 +66,7 @@ const game = (() => {
         cell = cell.target
         const index = +cell.getAttribute('index');
         displayController.setMark(index, currentPlayerObj.svgMark);
-        boardArray[index] = currentPlayerObj.mark;
+        game.boardArray[index] = currentPlayerObj.mark;
 
         const results = ['x', 'o', 'tie']
         let result = ''
@@ -76,6 +76,9 @@ const game = (() => {
         if (result !== '') game.endGame(result)
         
         currentPlayerObj = (currentPlayerObj == playerOne) ? playerTwo : playerOne;
+        if (!currentPlayerObj.isHuman) {
+            computer.makeMove()
+        }
     }
 
     const endGame = (w) => {
@@ -221,5 +224,66 @@ const gameMenu = (() => {
         newGame
     }
 })();
+
+const computer = (() => {
+    const randomCell = (arr) => {
+        let out = Math.floor(Math.random() * arr.length)
+        while (arr[out] !== '') {
+            out = Math.floor(Math.random() * arr.length)
+        }
+        game.cellEventHandler({target: document.querySelector(`.card[index="${out}"]`)})
+        return out
+    }
+
+    const removeDuplicates = (arr) => {
+        return arr
+    }
+
+    let moves = []
+
+    const makeMove = () => {
+        if (!game.boardArray.includes('o')) {
+            moves.push(randomCell(game.boardArray))
+            return
+        }
+        if (moves.length == 1) {
+            let options = [moves[0]]
+            switch (options[0]) {
+                case 2:
+                    options.push(options[0] - 1)
+                    options.push(options[0] - 2)
+                case 1:
+                case 0:
+                    options.push(options[0] + 3)
+                    options.push(options[0] + 6)
+                    break
+                case 5:
+                    options.push(options[0] - 1)
+                    options.push(options[0] - 2)
+                    case 4:
+                case 3:
+                    options.push(options[0] - 3)
+                    options.push(options[0] + 3)
+                    break
+                case 8:
+                    options.push(options[0] - 1)
+                    options.push(options[0] - 2)
+                case 7:
+                case 6:
+                    options.push(options[0] - 3)
+                    options.push(options[0] - 6)
+                    break
+                default:
+                    console.log('Error')
+            }
+            // moves.push(randomCell())
+        }
+    }
+
+    return {
+        makeMove,
+        randomCell
+    }
+})()
 
 gameMenu.handleMenu()
