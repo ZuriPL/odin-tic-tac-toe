@@ -33,7 +33,7 @@ const game = (() => {
 
     const initVars = () => {
         currentPlayerObj = playerOne;
-        boardArray = ['', '', '', '', '', '', '', '', ''];
+        game.boardArray = ['', '', '', '', '', '', '', '', ''];
     }
 
     const getCurrentPlayerObj = () => {
@@ -42,8 +42,8 @@ const game = (() => {
 
     const doesMarkWin = (mark) => {
         let result = false;
-        const arr = boardArray;
-
+        const arr = game.boardArray;
+        
         // yes, there's a lot of magic numbers in here and I hate it
         for (let i = 0; i < 3; i++) {
             if (arr[i] == mark && arr[i + 3] == mark && arr[i + 6] == mark) {
@@ -58,12 +58,15 @@ const game = (() => {
         } else if (arr[2] == mark && arr[6] == mark) {
             result = true
         };
-        if (mark == 'tie' && !arr.includes('')) return true
+        if (mark == 'tie' && !!!game.boardArray.includes('')) result =  true
         return result;
     };
 
     const cellEventHandler = (cell) => {
         cell = cell.target
+
+        if (cell.textContent !== '') return 
+
         const index = +cell.getAttribute('index');
         displayController.setMark(index, currentPlayerObj.svgMark);
         game.boardArray[index] = currentPlayerObj.mark;
@@ -73,7 +76,10 @@ const game = (() => {
         for (let i in results) {
             if (doesMarkWin(results[i])) result = results[i]
         }
-        if (result !== '') game.endGame(result)
+        if (result !== '') {
+            game.endGame(result)
+            return
+        }
         
         currentPlayerObj = (currentPlayerObj == playerOne) ? playerTwo : playerOne;
         if (!currentPlayerObj.isHuman) {
@@ -104,7 +110,8 @@ const game = (() => {
         cellEventHandler,
         getCurrentPlayerObj,
         initVars,
-        endGame
+        endGame,
+        doesMarkWin
     };
 })();
 
@@ -112,7 +119,7 @@ const game = (() => {
 
 const displayController = (() => {
     const clear = () => {
-        game.boardArray = ['', '', '', '', '', '', '', '', ''];
+        game.initVars()
         initGrid();
     };
 
@@ -226,63 +233,126 @@ const gameMenu = (() => {
 })();
 
 const computer = (() => {
-    const randomCell = (arr) => {
-        let out = Math.floor(Math.random() * arr.length)
-        while (arr[out] !== '') {
-            out = Math.floor(Math.random() * arr.length)
+    let moves = []
+
+    const chooseRandomCell = (arr) => {
+        let out = arr.sort((a, b) => 0.5 - Math.random())[0]
+        while (game.boardArray[out] !== '') {
+            out = arr.sort((a, b) => 0.5 - Math.random())[0]
         }
         game.cellEventHandler({target: document.querySelector(`.card[index="${out}"]`)})
         return out
     }
 
-    const removeDuplicates = (arr) => {
-        return arr
+    const getLegalMoves = (arr = [0, 1, 2, 3, 4, 5, 6, 7, 8]) => {
+        let legalMoves = []
+        arr.forEach(x => {
+            if (game.boardArray[x] === '') {
+                legalMoves.push(x)
+            }
+        })
+        return legalMoves
     }
 
-    let moves = []
+    const makeSmartMove = (i) => {
+        let options = []
+        switch (moves[i]) {
+            case 0:
+                options = options.concat([1, 2, 3, 6, 4, 8])
+                break
+            case 1:
+                options = options.concat([0, 2, 4, 7])
+                break
+            case 2:
+                options = options.concat([0, 1, 5, 8, 4, 6])
+                break
+            case 3:
+                options = options.concat([0, 6, 4, 5])
+                break
+            case 4:
+                options = options.concat([0, 1, 2, 3, 5, 6, 7, 8])
+                break
+            case 5:
+                options = options.concat([2, 8, 4, 3])
+                break
+            case 6:
+                options = options.concat([0, 3, 7, 8, 4, 2])
+                break
+            case 7:
+                options = options.concat([6, 8, 4, 1])
+                break
+            case 8:
+                options = options.concat([0, 4, 6, 7, 2, 5])
+                break
+            default:
+                console.log('Error')
+        };
+        return options
+    };
+
+    const isWinnableForMark = (mark) => {
+        let result = false
+        if ((game.boardArray[2] == mark && game.boardArray[1] == mark) || (game.boardArray[3] == mark && game.boardArray[6] == mark) || (game.boardArray[4] == mark && game.boardArray[8] == mark)) {
+            if (game.boardArray[0] === '') { result = 0 }
+        } else if ((game.boardArray[0] == mark && game.boardArray[2] == mark) || (game.boardArray[4] == mark && game.boardArray[7] == mark)) {
+            if (game.boardArray[1] === '') { result = 1 }
+        } else if ((game.boardArray[0] == mark && game.boardArray[1] == mark) || (game.boardArray[5] == mark && game.boardArray[8] == mark) || (game.boardArray[4] == mark && game.boardArray[6] == mark)) {
+            if (game.boardArray[2] === '') { result = 2 }
+        } else if ((game.boardArray[0] == mark && game.boardArray[6] == mark) || (game.boardArray[4] == mark && game.boardArray[5] == mark)) {
+            if (game.boardArray[3] === '') { result = 3 }
+        } else if ((game.boardArray[3] == mark && game.boardArray[5] == mark) || (game.boardArray[1] == mark && game.boardArray[7] == mark ) || (game.boardArray[0] == mark && game.boardArray[8] == mark ) || (game.boardArray[6] == mark && game.boardArray[2] == mark )) {
+            if (game.boardArray[4] === '') { result = 4 }
+        } else if ((game.boardArray[3] == mark && game.boardArray[4] == mark) || (game.boardArray[2] == mark && game.boardArray[8] == mark )) {
+            if (game.boardArray[5] === '') { result = 5 }
+        } else if ((game.boardArray[0] == mark && game.boardArray[3] == mark) || (game.boardArray[7] == mark && game.boardArray[8] == mark ) || (game.boardArray[4] == mark && game.boardArray[2] == mark )) {
+            if (game.boardArray[6] === '') { result = 6 }
+        } else if ((game.boardArray[6] == mark && game.boardArray[8] == mark) || (game.boardArray[1] == mark && game.boardArray[4] == mark )) {
+            if (game.boardArray[7] === '') { result = 7 }
+        } else if ((game.boardArray[2] == mark && game.boardArray[5] == mark) || (game.boardArray[6] == mark && game.boardArray[7] == mark ) || (game.boardArray[0] == mark && game.boardArray[4] == mark )) {
+            if (game.boardArray[8] === '') { result = 8 }
+        }
+
+        return result
+    }
+
+    const isWinnable = () => {
+        return isWinnableForMark('o')
+    }
+    
+    const isLosable = () => {
+        return isWinnableForMark('x')
+    }
 
     const makeMove = () => {
-        if (!game.boardArray.includes('o')) {
-            moves.push(randomCell(game.boardArray))
-            return
-        }
-        if (moves.length == 1) {
-            let options = [moves[0]]
-            switch (options[0]) {
-                case 2:
-                    options.push(options[0] - 1)
-                    options.push(options[0] - 2)
-                case 1:
-                case 0:
-                    options.push(options[0] + 3)
-                    options.push(options[0] + 6)
-                    break
-                case 5:
-                    options.push(options[0] - 1)
-                    options.push(options[0] - 2)
-                    case 4:
-                case 3:
-                    options.push(options[0] - 3)
-                    options.push(options[0] + 3)
-                    break
-                case 8:
-                    options.push(options[0] - 1)
-                    options.push(options[0] - 2)
-                case 7:
-                case 6:
-                    options.push(options[0] - 3)
-                    options.push(options[0] - 6)
-                    break
-                default:
-                    console.log('Error')
-            }
-            // moves.push(randomCell())
+        let winMove = isWinnable()
+        let loseMove = isLosable()
+        if (winMove !== false) {
+            console.log('win')
+            chooseRandomCell(getLegalMoves([winMove]))
+        } else if (loseMove !== false) {
+            console.log('phew')
+            chooseRandomCell(getLegalMoves([loseMove]))
+        } else if (moves.length == 0) {
+            moves.push(chooseRandomCell(getLegalMoves()))
+        } else if (moves.length == 1) {
+            makeSmartMove(0)
+            moves.push(chooseRandomCell(getLegalMoves(makeSmartMove(0))))
+        } else {
+            let options = []
+            moves.forEach(x => {
+                options = options.concat(getLegalMoves(makeSmartMove(moves.indexOf(x))))
+            })
+            // removes duplicates
+            options = [...new Set(options)]
+            moves.push(chooseRandomCell(getLegalMoves(options)))
         }
     }
 
     return {
         makeMove,
-        randomCell
+        getLegalMoves,
+        chooseRandomCell,
+        isWinnableForMark
     }
 })()
 
