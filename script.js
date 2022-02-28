@@ -48,21 +48,21 @@ const game = (() => {
                 result = true
             };
         };
-        if (result || arr[4] !== mark) return result
-        if (arr[0] == mark && arr[8] == mark) {
-            result = true
-        } else if (arr[2] == mark && arr[6] == mark) {
-            result = true
-        };
-        if (mark == 'tie' && !!!game.boardArray.includes('')) result =  true
+        if (!result && arr[4] == mark) {
+            if (arr[0] == mark && arr[8] == mark) {
+                result = true
+            } else if (arr[2] == mark && arr[6] == mark) {
+                result = true
+            };
+        }
+        if (mark == 'tie' && !game.boardArray.includes('')) { result =  true }
         return result;
     };
-
+    let n = 0
     const cellEventHandler = (cell) => {
         cell = cell.target
 
         if (cell.textContent !== '') return 
-
         const index = +cell.getAttribute('index');
         displayController.setMark(index, currentPlayerObj.svgMark);
         game.boardArray[index] = currentPlayerObj.mark;
@@ -70,14 +70,15 @@ const game = (() => {
         const results = ['x', 'o', 'tie']
         let result = ''
         for (let i in results) {
-            if (doesMarkWin(results[i])) result = results[i]
-        }
-        if (result !== '') {
-            game.endGame(result)
-            return
+            if (doesMarkWin(results[i])) {
+                result = results[i]
+                game.endGame(result)
+                return
+            }
         }
         
         currentPlayerObj = (currentPlayerObj == playerOne) ? playerTwo : playerOne;
+
         if (!currentPlayerObj.isHuman) {
             computer.makeMove()
         }
@@ -95,8 +96,12 @@ const game = (() => {
             case 'o':
                 msg = `Player P2 wins!`;
                 break;
+            case 'tie':
+                msg = "It's a tie";
+                break;
             default:
                 msg = "It's a tie";
+                break;
         };
         displayController.endGame(msg);
     }
@@ -335,7 +340,7 @@ const computer = (() => {
             })
             // removes duplicates
             options = [...new Set(options)]
-            moves.push(chooseRandomCell(getLegalMoves(options)))
+            moves.push((options == []) ? chooseRandomCell(getLegalMoves(options)) : chooseRandomCell(getLegalMoves()))
         }
     }
 
