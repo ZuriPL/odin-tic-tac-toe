@@ -320,10 +320,8 @@ const computer = (() => {
         let winMove = isWinnable()
         let loseMove = isLosable()
         if (winMove !== false) {
-            console.log('win')
             chooseRandomCell(getLegalMoves([winMove]))
         } else if (loseMove !== false) {
-            console.log('phew')
             chooseRandomCell(getLegalMoves([loseMove]))
         } else if (moves.length == 0) {
             moves.push(chooseRandomCell(getLegalMoves()))
