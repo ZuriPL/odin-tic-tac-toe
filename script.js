@@ -36,10 +36,6 @@ const game = (() => {
         game.boardArray = ['', '', '', '', '', '', '', '', ''];
     }
 
-    const getCurrentPlayerObj = () => {
-        return currentPlayerObj;
-    };
-
     const doesMarkWin = (mark) => {
         let result = false;
         const arr = game.boardArray;
@@ -108,10 +104,8 @@ const game = (() => {
     return {
         boardArray,
         cellEventHandler,
-        getCurrentPlayerObj,
         initVars,
-        endGame,
-        doesMarkWin
+        endGame
     };
 })();
 
@@ -227,8 +221,7 @@ const gameMenu = (() => {
     }
 
     return {
-        handleMenu,
-        newGame
+        handleMenu
     }
 })();
 
@@ -350,9 +343,6 @@ const computer = (() => {
 
     return {
         makeMove,
-        getLegalMoves,
-        chooseRandomCell,
-        isWinnableForMark
     }
 })()
 
