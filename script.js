@@ -1,12 +1,3 @@
-const wrapperDOM = document.getElementById('wrapper');
-let boardDOM;
-function initBoard() {
-    document.querySelector('#board')?.remove()
-    boardDOM = document.createElement('div')
-    boardDOM.setAttribute('id', 'board')
-    wrapperDOM.appendChild(boardDOM)
-};
-
 const playerFactory = (name, mark, isHuman) => {
     let svgMark = `<svg style="width:48px;height:48px" viewBox="0 0 24 24">
     <path fill="currentColor" d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" />
@@ -24,10 +15,12 @@ const playerFactory = (name, mark, isHuman) => {
     };
 };
 
-let playerOne
-let playerTwo
+
 
 const game = (() => {
+    let playerOne
+    let playerTwo
+
     let boardArray = ['', '', '', '', '', '', '', '', ''];
     let currentPlayerObj;
 
@@ -42,12 +35,15 @@ const game = (() => {
         
         // yes, there's a lot of magic numbers in here and I hate it
         for (let i = 0; i < 3; i++) {
+            // first if block checks each row (3 and 6 are vertical offsets)
+            // second if block checks each row (i * 3 takes the first cell of a row and adds horizontal offsets)
             if (arr[i] == mark && arr[i + 3] == mark && arr[i + 6] == mark) {
                 result = true
             } else if (arr[i * 3] == mark && arr[i * 3 + 1] == mark && arr[i * 3 + 2] == mark) {
                 result = true
             };
         };
+        // checks for diagonal wins
         if (!result && arr[4] == mark) {
             if (arr[0] == mark && arr[8] == mark) {
                 result = true
@@ -58,9 +54,9 @@ const game = (() => {
         if (mark == 'tie' && !game.boardArray.includes('')) { result =  true }
         return result;
     };
-    let n = 0
-    const cellEventHandler = (cell) => {
-        cell = cell.target
+
+    const cellEventHandler = (e) => {
+        cell = e.target
 
         if (cell.textContent !== '') return 
         const index = +cell.getAttribute('index');
@@ -84,12 +80,12 @@ const game = (() => {
         }
     }
 
-    const endGame = (w) => {
+    const endGame = (result) => {
         Array.from(document.querySelectorAll('#board > *')).forEach(cell => {
             cell.removeEventListener('click', game.cellEventHandler);
         })
         let msg
-        switch (w) {
+        switch (result) {
             case 'x':
                 msg = `Player P1 wins!`;
                 break;
@@ -117,6 +113,16 @@ const game = (() => {
 
 
 const displayController = (() => {
+    const wrapperDOM = document.getElementById('wrapper');
+    let boardDOM;
+
+    function initBoard() {
+        document.querySelector('#board')?.remove()
+        boardDOM = document.createElement('div')
+        boardDOM.setAttribute('id', 'board')
+        wrapperDOM.appendChild(boardDOM)
+    };
+
     const clear = () => {
         game.initVars()
         initGrid();
@@ -131,22 +137,20 @@ const displayController = (() => {
             cell.classList.add('card');
             cell.textContent = game.boardArray[i];
             cell.setAttribute('index', i);
-            
-            // the if block is only here so I can collapse it in VSCode
-            if (true) {
-                if (i < 3) {
-                    cell.classList.add('grid-top-edge');
-                } 
-                if (i >= 3 * 3 - 3) {
-                    cell.classList.add('grid-bottom-edge');
-                } 
-                if (i % 3 == 0) {
-                    cell.classList.add('grid-left-edge')
-                }
-                if (i % 3 == 3 - 1) {
-                    cell.classList.add('grid-right-edge')
-                }
-            };
+
+            // adds classes to cell on the edges of the grid, that remove outside borders
+            if (i < 3) {
+                cell.classList.add('grid-top-edge');
+            } 
+            if (i >= 3 * 3 - 3) {
+                cell.classList.add('grid-bottom-edge');
+            } 
+            if (i % 3 == 0) {
+                cell.classList.add('grid-left-edge')
+            }
+            if (i % 3 == 3 - 1) {
+                cell.classList.add('grid-right-edge')
+            }
             
             
             boardDOM.appendChild(cell);
@@ -162,13 +166,13 @@ const displayController = (() => {
     };
 
 
-    const endGame = (w) => {
+    const endGame = (msg) => {
         const endWrapper = document.createElement('div')
         endWrapper.classList.add('end-wrapper')
         document.querySelector('#wrapper').insertBefore(endWrapper, document.querySelector('#board'))
 
         const endTitle = document.createElement('h1')
-        endTitle.textContent = w
+        endTitle.textContent = msg
         endTitle.classList.add('win-title')
         endWrapper.appendChild(endTitle)
 
@@ -177,7 +181,7 @@ const displayController = (() => {
         newGameBtn.classList.add('end-game-button')
         document.querySelector('#wrapper').appendChild(newGameBtn)
 
-        newGameBtn.addEventListener('click', e => {
+        newGameBtn.addEventListener('click', _ => {
             gameMenu.handleMenu()
             endWrapper.remove()
             newGameBtn.remove()
@@ -209,16 +213,16 @@ const gameMenu = (() => {
         buttonTwo.addEventListener('click', handleClick);
     };
 
-    const newGame = (x) => {
+    const newGame = (gamemode) => {
         document.querySelector('#menu').classList.add('hidden')
         document.querySelector('#wrapper').classList.remove('hidden')
 
-        if (x == 1) {
-            playerOne = playerFactory('P1', 'x', true);
-            playerTwo = playerFactory('P2', 'o', false);
+        if (gamemode == 1) {
+            game.playerOne = playerFactory('P1', 'x', true);
+            game.playerTwo = playerFactory('P2', 'o', false);
         } else {
-            playerOne = playerFactory('P1', 'x', true);
-            playerTwo = playerFactory('P2', 'o', true);
+            game.playerOne = playerFactory('P1', 'x', true);
+            game.playerTwo = playerFactory('P2', 'o', true);
         }
 
         game.initVars()
@@ -244,9 +248,9 @@ const computer = (() => {
 
     const getLegalMoves = (arr = [0, 1, 2, 3, 4, 5, 6, 7, 8]) => {
         let legalMoves = []
-        arr.forEach(x => {
-            if (game.boardArray[x] === '') {
-                legalMoves.push(x)
+        arr.forEach(i => {
+            if (game.boardArray[i] === '') {
+                legalMoves.push(i)
             }
         })
         return legalMoves
@@ -290,6 +294,8 @@ const computer = (() => {
 
     const isWinnableForMark = (mark) => {
         let result = false
+
+        // checks for all possible marks combinations, returns the index of the cell that results in a win, false if not possible
         if ((game.boardArray[2] == mark && game.boardArray[1] == mark) || (game.boardArray[3] == mark && game.boardArray[6] == mark) || (game.boardArray[4] == mark && game.boardArray[8] == mark)) {
             if (game.boardArray[0] === '') { result = 0 }
         } else if ((game.boardArray[0] == mark && game.boardArray[2] == mark) || (game.boardArray[4] == mark && game.boardArray[7] == mark)) {
