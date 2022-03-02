@@ -25,7 +25,7 @@ const game = (() => {
     let currentPlayerObj;
 
     const initVars = () => {
-        currentPlayerObj = playerOne;
+        currentPlayerObj = game.playerOne;
         game.boardArray = ['', '', '', '', '', '', '', '', ''];
     }
 
@@ -73,7 +73,7 @@ const game = (() => {
             }
         }
         
-        currentPlayerObj = (currentPlayerObj == playerOne) ? playerTwo : playerOne;
+        currentPlayerObj = (currentPlayerObj == game.playerOne) ? game.playerTwo : game.playerOne;
 
         if (!currentPlayerObj.isHuman) {
             computer.makeMove()
@@ -106,7 +106,9 @@ const game = (() => {
         boardArray,
         cellEventHandler,
         initVars,
-        endGame
+        endGame,
+        playerOne,
+        playerTwo
     };
 })();
 
